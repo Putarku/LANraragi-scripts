@@ -1,7 +1,7 @@
 #使用方法：在插件配置页面点击上传插件选择插件即可
 注意！上传pm插件时候一定要把文件名改成插件第一行的名字，否则会失败。
 
-ComicLooms.pm：https://github.com/MapoMagpie/eh-view-enhance下载器处理脚本
+ComicLooms.pm：[eh-view-enhance](https://github.com/MapoMagpie/eh-view-enhance)下载器处理脚本
     特点：提取档案中的meta.json的标签，已针对禁漫，nhentai下载的本子优化，可选汉化
     
 EHentai.pm：E站搜索插件
