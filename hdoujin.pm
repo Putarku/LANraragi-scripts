@@ -9,7 +9,7 @@ use URI::Escape;
 use Mojo::JSON qw(decode_json encode_json);
 use Mojo::Util qw(html_unescape);
 use Mojo::UserAgent;
-use utf8; 
+use utf8; # 这一行是重复的，已在前面声明过，故移除
 #You can also use the LRR Internal API when fitting.
 use LANraragi::Model::Plugins;
 
@@ -23,9 +23,9 @@ sub plugin_info {
         namespace  => "hdoujin",
         login_from => "",
         author     => "Paturku",
-        version    => "1.2.7",
+        version    => "1.3.0",
         description =>
-               "从 hdoujin.org 获取元数据。支持URL格式：hdoujin.org/g/{id}/{key}。",
+                "从 hdoujin.org 获取元数据，并提取namespace为8和9的标签（自动添加female:和male:前缀）。支持URL格式：hdoujin.org/g/{id}/{key}。",
         icon =>
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAABP0lEQVR4nO2UMUvDQBTH/3dJLLQFoYOLk4uLs5ODH0AQnBwcHJwcHPwAIjg5ODg4ODg4iKODg4M4Ojg4iKOgIEWkpZe8c0itqQYaW3Dw4A2Pd7/7/d+7907wjyGAOwCvAKKsXgDcAigA8Fwwxh0MBpVut7vXbrdPAZQBbAJIAHwCeAdwZIzZXwpGUVTpdDr7nU7nDMCGiGwZY7aMMbUwDPestRcANqWU1Ov1k4VgGIYH3W73HEBZRLbTNG2EYVhL07QRx/FRkiQXAMpRFB3OBb1SqVTr9XoHgA9gO0mSRhAEtSRJGmEY1qy1FwDKALZqtdrxTDCO4+MgCPZFZCdJkkYQBDVrbX0MjsF6vX46BcZxfDwGd5MkaQRBULPWnmeQMeZwJhiG4eEYrFtrz7KKJ+AXgMpS8Df4BvUdKYlU/Pc2AAAAAElFTkSuQmCC",
           
@@ -33,6 +33,8 @@ sub plugin_info {
             { type => "string", desc => "搜索语言（默认为12，表示中文）" },
             { type => "bool",   desc => "使用标题的 ID 进行搜索（仅匹配数字开头-结尾的标题，例如：134-(C100)ABC.zip，如果失败，则回退到标题）" },
             { type => "string", desc => "API认证令牌（必填，格式为UUID，例如：73d2333b-ddc1-4953-9a37-2e130dd87ea6）" },
+            { type => "bool",   desc => "启用中文标签翻译" },
+            { type => "string", desc => "中文翻译数据库路径（JSON文件，仅在启用中文标签翻译时需要）" },
         ],
 
         oneshot_arg => "该漫画在hdoujin.org的URL(支持格式：hdoujin.org/g/{id}/{key} 或 hdoujin.org/books/detail/{id}/{key})",
@@ -47,7 +49,7 @@ sub get_tags {
     shift;
     my $lrr_info = shift;                                # Global info hash
     my $ua       = $lrr_info->{user_agent};
-    my ( $lang, $search_id, $api_token ) = @_;          # Plugin parameters
+    my ( $lang, $search_id, $api_token, $enable_cn_translation, $cn_db_path ) = @_;          # Plugin parameters
 
     # Use the logger to output status - they'll be passed to a specialized logfile and written to STDOUT.
     my $logger = get_plugin_logger();
@@ -98,7 +100,7 @@ sub get_tags {
         $logger->debug("HDOujin 画廊ID: $id / $key");
     }
 
-    my ( $tags, $title ) = &get_tags_from_hdoujin( $ua, $id, $key );
+    my ( $tags, $title ) = &get_tags_from_hdoujin( $ua, $id, $key, $enable_cn_translation, $cn_db_path );
     my %hashdata = ( tags => $tags );
 
     # Add source URL and title if possible/applicable
@@ -230,7 +232,7 @@ sub hdoujin_parse {
 # 执行hdoujin.org API请求并返回标签和标题
 sub get_tags_from_hdoujin {
 
-    my ( $ua, $id, $key ) = @_;
+    my ( $ua, $id, $key, $enable_cn_translation, $cn_db_path ) = @_;
     my $logger = get_plugin_logger();
     
     my $detail_url = "https://api.hdoujin.org/books/detail/$id/$key";
@@ -308,7 +310,55 @@ sub get_tags_from_hdoujin {
     my $tags = join(", ", @extracted_tags);
     $logger->info("提取的namespace=8和9标签 (" . scalar(@extracted_tags) . "个，已添加female:和male前缀): $tags");
     
-    return ($tags, $title);
+    # 如果启用了中文翻译且提供了数据库路径，则进行翻译
+    if ($enable_cn_translation && $cn_db_path && -f $cn_db_path) {
+        $logger->info("启用中文标签翻译，使用数据库: $cn_db_path");
+        my @tag_list = split(/,\s*/, $tags);
+        my @translated_tags = @{translate_tag_to_cn(\@tag_list, $cn_db_path)};
+        my $translated_tags_str = join(", ", @translated_tags);
+        $logger->info("翻译后的标签: $translated_tags_str");
+        return ($translated_tags_str, $title);
+    } else {
+        if ($enable_cn_translation) {
+            $logger->info("中文翻译已启用，但数据库文件不存在或未指定: $cn_db_path");
+        }
+        return ($tags, $title);
+    }
+}
+
+# 将原tag翻译为中文tag
+sub translate_tag_to_cn {
+    my $logger = get_plugin_logger();
+    my ($list, $db_path) = @_;
+    my $filename = $db_path; # json 文件的路径
+    my $json_text = do {
+        open(my $json_fh, "<", $filename)
+            or $logger->debug("Can't open $filename: $!\n");
+        local $/;
+        <$json_fh>;
+    };
+    my $json = decode_json($json_text);
+    my $target = $json->{'data'};
+
+    for my $item (@$list) {
+        my ($namespace, $key) = split(/:/, $item);
+        for my $element (@$target) {
+            # 如果$namespace与'namespace'字段相同，则进行替换
+            if ($element->{'namespace'} eq $namespace) {
+                my $name = $element->{'frontMatters'}->{'name'};
+                $item =~ s/$namespace/$name/;
+                my $data = $element->{'data'};
+                # 如果在'data'字段中存在$key，则进行替换
+                if (exists $data->{$key}) {
+                    my $value = $data->{$key}->{'name'};
+                    $item =~ s/$key/$value/;
+                }
+                last;
+            }
+        }
+    }
+    
+    return $list;
 }
 
 1;
