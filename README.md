@@ -25,22 +25,29 @@
 
 ## 其他github上我觉得有用的lanraragi周边内容
  - **地址:** [ETagCN](https://github.com/zhy201810576/ETagCN/releases)
+   
    **描述:** 汉化版的ehentai刮削插件，可直接刮削汉化tag
 
  - **地址:** [ETagConverter](https://github.com/zhy201810576/ETagConverter/releases)
+   
    **描述:** 用于将插件刮削的英文tag转换为中文的脚本
 
  - **地址:** [addEhentaiMetadata](https://github.com/chu-shen/LANraragi/blob/feat-ratingAndcomment/lib/LANraragi/Plugin/Scripts/addEhentaiMetadata.pm)
+   
    **描述:** 可以为所有没有`source标签`的本子触发一次`ehentai`插件刮削，这样可以进行查缺补漏。
 
  - **地址:** [chu-shen/LANraragi-scripts](https://github.com/chu-shen/LANraragi-scripts)
+   
    **描述:** 一些插件集合
 
  - **地址:** [chihiro830/LANraragiPlugin](https://github.com/chihiro830/LANraragiPlugin)
+   
    **描述:** `FolderToCat` 插件的增强版本。该插件可以将内容文件夹中的子文件夹自动转换为静态分类
 
  - **地址:** [starP-W/HAtH-Plugin-CN](https://github.com/starP-W/HAtH-Plugin-CN)
+   
    **描述:** 通过 `HentaiAtHome Downloader` 的 `galleryinfo.txt` 文件收集嵌入存档的元数据
 
  - **地址:** [Tsukihi](https://github.com/Difegue/Tsukihi)
+   
    **描述:** 用于在e-hentai检索当前画廊是否已经在LRR中的浏览器插件。
