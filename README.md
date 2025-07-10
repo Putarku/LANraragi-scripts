@@ -14,7 +14,7 @@
 - 使用方法：将`ApplyCopyrightTags.py`和`search_keywords.txt`下载到同一位置，配置`lanraragi的地址`和`管理员密码`后使用`python ApplyCopyrightTags.py`启动。我个人测试约花费了10分钟左右的时间。
 ![](图片2.png)
 
-## hdoujin元数据刮削插件
+## hdoujin元数据刮削插件（*不要开启自动运行，仅作为补漏使用）
 - 脚本功能：从[hdoujin.org](https://hdoujin.org)中获取画廊的元数据
 - 使用方法：将`hdoujin.pm`下载后，在LANraragi的插件配置页面上传，并配置好参数即可。插件需要的UUID可以在站点注册后，在搜索页面用f12抓取，在标头的`Authorization`字段里，样子一般为`Bearer adaddddd4-811e-4c09-8457-1dddddddae12`，只需要将后半那一长串填入插件配置即可。
 - 一些说明：目前[hdoujin.org](https://hdoujin.org)的搜索规则不太完善，使用[作者名 画廊名]检索时会没有返回数据。
