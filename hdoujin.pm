@@ -105,7 +105,7 @@ sub get_tags {
 
     # Add source URL and title if possible/applicable
     if ( $hashdata{tags} ne "" ) {
-        if ( !$hasSrc ) { $hashdata{tags} .= ", source:hdoujin.org/g/$id/$key"; }
+        $hashdata{tags} .= ", source:hdoujin.org/g/$id/$key";
         $hashdata{title} = $title if $title ne "";
     }
     
