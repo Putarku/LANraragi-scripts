@@ -1,6 +1,11 @@
 # LANraragi-scripts
 自用LANraragi相关脚本
 
+## 更新日志
+```
+2026-05-25 新增Copy Tags、SourceBatch插件，修改nHentai插件使其适配0.9.71版本
+```
+
 ## e站浏览标识器
 - 脚本功能：在e站的搜索浏览页面上添加标识，标识出该画廊是否在LANraragi中存在
 - 安装方法：将`ExHentai Lanraragi Checker.js`放入浏览器的用户脚本管理器中，配置`lanraragi的地址`和`API key`后启用该脚本
@@ -13,6 +18,10 @@
 - 使用前提：LANraragi的画廊元数据中包含`艺术家:xx`或`群组:xx`的标签
 - 使用方法：将`ApplyCopyrightTags.py`和`search_keywords.txt`下载到同一位置，配置`lanraragi的地址`和`管理员密码`后使用`python ApplyCopyrightTags.py`启动。我个人测试约花费了10分钟左右的时间。
 ![](图片2.png)
+
+## 更强的重检索插件`SourceBatch.pm`
+- 脚本功能：统合ehentai、hentag、hdoujin等插件的重检索功能，对没有元数据的画廊批量尝试补充元数据，可自定义调用哪些插件。对source标签进行规范化处理，将所有插件的source标签转换为统一的格式。
+
 
 ## hdoujin元数据刮削插件（*不要开启自动运行，仅作为补漏使用）
 - 脚本功能：从[hdoujin.org](https://hdoujin.org)中获取画廊的元数据
